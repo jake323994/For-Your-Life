@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Your Life & Password Manager</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Myanmar Font (Padauk) -->
+    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS Styles -->
+    <style>
+        body {
+            font-family: 'Padauk', sans-serif;
+            background-color: #cbd5e1;
+        }
+        .app-container {
+            max-width: 420px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #ffffff;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-300">
+
+<div class="app-container flex flex-col justify-between">
+
+    <!-- Pop-up Toast Notification -->
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-sm flex items-center space-x-2 transition-all duration-300">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMsg">အချက်အလက်များကို သိမ်းဆည်းပြီးပါပြီ</span>
+    </div>
+
+    <!-- Screen 1: Login Screen -->
+    <div id="loginScreen" class="p-6 flex flex-col justify-center items-center min-h-screen bg-gradient-to-b from-blue-600 to-indigo-800 text-white">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-sm border border-white/30 shadow-inner">
+                <i class="fa-solid fa-wallet text-3xl text-white"></i>
+            </div>
+            <h1 class="text-2xl font-bold tracking-wide">For your Life</h1>
+            <p class="text-blue-100 text-xs mt-1">အိမ်သုံးနှင့် ကိုယ်ပိုင် ဘတ်ဂျက် စီမံခန့်ခွဲမှု</p>
+        </div>
+
+        <div class="w-full bg-white/10 p-5 rounded-2xl backdrop-blur-md shadow-lg border border-white/20">
+            <div class="mb-4">
+                <label class="block text-xs mb-1 text-blue-100 font-bold">User Name</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+                    <input type="text" id="usernameInput" placeholder="User Name ထည့်ပါ" class="w-full pl-10 pr-3 py-2 bg-white text-slate-800 font-bold text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-slate-400">
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <label class="block text-xs mb-1 text-blue-100 font-bold">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                    <input type="password" id="passwordInput" placeholder="Password ထည့်ပါ" class="w-full pl-10 pr-10 py-2 bg-white text-slate-800 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-slate-400">
+                    <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                        <i id="passwordToggleIcon" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-right mb-5">
+                <button onclick="openForgotPasswordModal()" class="text-xs text-yellow-300 hover:text-yellow-200 font-bold underline">
+                    Password မေ့နေပါသလား?
+                </button>
+            </div>
+
+            <button onclick="loginUser()" class="w-full py-2.5 bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold text-sm rounded-xl shadow-md transition duration-200 active:scale-95 mb-3">
+                ဝင်ရောက်မည်
+            </button>
+
+            <button onclick="openRegisterModal()" class="w-full py-2 bg-white/20 hover:bg-white/30 text-white font-bold text-xs rounded-xl border border-white/30 transition">
+                အကောင့်အသစ် ပြုလုပ်ရန် (Register)
+            </button>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 text-slate-100 rounded-2xl p-5 w-full max-w-sm shadow-2xl border border-slate-700 space-y-3">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                <h3 class="font-bold text-sm text-yellow-400">User အကောင့်အသစ် တောင်းဆိုရန်</h3>
+                <button onclick="closeRegisterModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-300">အကောင့်ဖန်တီးရန် တင်သွင်းလိုက်ပါက Admin ထံသို့ ရောက်ရှိမည်ဖြစ်ပြီး Admin မှ ခွင့်ပြုပေးမှသာ ဝင်ရောက်နိုင်မည် ဖြစ်ပါသည်။</p>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">User Name</label>
+                <input type="text" id="regUsername" placeholder="သုံးမည့် အမည်ထည့်ပါ..." class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-yellow-400">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Password</label>
+                <input type="password" id="regPassword" placeholder="လျှို့ဝှက်နံပါတ်ထည့်ပါ..." class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-yellow-400">
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="requestNewAccount()" class="flex-1 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold text-xs rounded-xl transition">
+                    ခွင့်ပြုချက်တောင်းမည်
+                </button>
+                <button onclick="closeRegisterModal()" class="px-3 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs rounded-xl transition">
+                    မလုပ်တော့ပါ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Request Modal -->
+    <div id="forgotPasswordModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 text-slate-100 rounded-2xl p-5 w-full max-w-sm shadow-2xl border border-slate-700 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                <div class="flex items-center space-x-2 text-yellow-400">
+                    <i class="fa-solid fa-key text-base"></i>
+                    <h3 class="font-bold text-sm text-white">Password အသစ်တောင်းဆိုရန်</h3>
+                </div>
+                <button onclick="closeForgotPasswordModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-300">လိုချင်သော Password အသစ်ကို ရေးထည့်ပြီး တင်သွင်းပါ။ Admin ထံသို့ အကြောင်းကြားသွားပါမည်။</p>
+            <div>
+                <input type="text" id="requestedPasswordInput" placeholder="လိုချင်သော Password အသစ်ထည့်ပါ..." class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-yellow-400 font-mono">
+            </div>
+            <div class="flex space-x-2 pt-1">
+                <button onclick="submitPasswordRequest()" class="flex-1 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold text-xs rounded-xl shadow-md transition active:scale-95">
+                    တင်သွင်းမည်
+                </button>
+                <button onclick="closeForgotPasswordModal()" class="px-3 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs rounded-xl transition">
+                    မလုပ်တော့ပါ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 2: Password Manager UI (Admin Screen) -->
+    <div id="passwordManagerScreen" class="hidden min-h-screen bg-slate-900 text-slate-100 p-4 flex flex-col justify-between">
+        <div>
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fa-solid fa-key text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-white">Password Manager (Admin)</h2>
+                        <p class="text-xs text-slate-400" id="vaultCount">0 Items Saved</p>
+                    </div>
+                </div>
+                <button onclick="navigateTo('loginScreen')" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition" title="လော့အုပ်မည်">
+                    <i class="fa-solid fa-right-from-bracket text-base"></i>
+                </button>
+            </div>
+
+            <!-- Account Approval Requests Section -->
+            <div id="accountApprovalSection" class="hidden mb-4 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-3.5 space-y-2">
+                <div class="flex items-center space-x-2 text-indigo-400 text-xs font-bold">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>အကောင့်အသစ် ဖန်တီးရန် တောင်းဆိုထားသည်</span>
+                </div>
+                <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 text-xs">
+                    <div>
+                        <span class="text-slate-400 text-[10px] block">တောင်းဆိုသူ အမည်:</span>
+                        <span id="pendingAccountNameDisplay" class="font-bold text-yellow-300 text-sm"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 text-[10px] block">တောင်းဆိုထားသော Password:</span>
+                        <span id="pendingAccountPassDisplay" class="font-mono font-bold text-yellow-300 text-sm"></span>
+                    </div>
+                    <div class="flex space-x-1.5 pt-1">
+                        <button onclick="approveAccountCreation()" class="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition text-xs">
+                            သဘောတူမည် (ခွင့်ပြုမည်)
+                        </button>
+                        <button onclick="rejectAccountCreation()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg transition text-xs">
+                            ပယ်ချမည်
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Request Notification Box -->
+            <div id="passwordRequestSection" class="hidden mb-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 space-y-2">
+                <div class="flex items-center space-x-2 text-amber-400 text-xs font-bold">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Password ပြင်ဆင်ရန် တောင်းဆိုထားသည်</span>
+                </div>
+                <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">တောင်းဆိုသူ & Password:</span>
+                        <span id="pendingPasswordUserDisplay" class="font-bold text-indigo-300 text-xs block"></span>
+                        <span id="pendingPasswordDisplay" class="font-mono font-bold text-yellow-300 text-sm"></span>
+                    </div>
+                    <div class="flex space-x-1.5">
+                        <button onclick="approvePasswordChange()" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition text-[11px]">
+                            သဘောတူမည်
+                        </button>
+                        <button onclick="rejectPasswordChange()" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg transition text-[11px]">
+                            ပယ်ချမည်
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="relative mb-4">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </span>
+                <input type="text" id="vaultSearch" oninput="renderVaultItems()" placeholder="ရှာဖွေရန်..." class="w-full pl-9 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                <button onclick="openAddVaultModal()" class="col-span-2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md flex items-center justify-center space-x-1.5 transition active:scale-95">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>အသစ်ထည့်မည်</span>
+                </button>
+                <button onclick="generateRandomPassword()" class="col-span-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold rounded-xl flex items-center justify-center space-x-1 transition active:scale-95">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Gen Pass</span>
+                </button>
+            </div>
+
+            <!-- Vault List Container -->
+            <div id="vaultList" class="space-y-2">
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Vault Item -->
+    <div id="addVaultModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 text-slate-100 rounded-2xl p-5 w-full max-w-sm shadow-2xl border border-slate-700 space-y-3">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                <h3 class="font-bold text-sm text-indigo-400">Password အသစ်သိမ်းဆည်းမည်</h3>
+                <button onclick="closeAddVaultModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Title (ဥပမာ- User App Account, Facebook)</label>
+                <input type="text" id="vTitle" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">User Name / Email</label>
+                <input type="text" id="vUser" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Password</label>
+                <input type="text" id="vPass" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-indigo-500 font-mono">
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button onclick="saveVaultItem()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition">
+                    သိမ်းဆည်းမည်
+                </button>
+                <button onclick="closeAddVaultModal()" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs rounded-xl transition">
+                    မလုပ်တော့ပါ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Editing Vault Item -->
+    <div id="editVaultModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 text-slate-100 rounded-2xl p-5 w-full max-w-sm shadow-2xl border border-slate-700 space-y-3">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                <h3 class="font-bold text-sm text-indigo-400">Password အချက်အလက် ပြင်ဆင်မည်</h3>
+                <button onclick="closeEditVaultModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <input type="hidden" id="editVaultId">
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Title</label>
+                <input type="text" id="editVTitle" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">User Name / Email</label>
+                <input type="text" id="editVUser" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Password</label>
+                <input type="text" id="editVPass" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-indigo-500 font-mono">
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button onclick="updateVaultItem()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition">
+                    ပြင်ဆင်မည်
+                </button>
+                <button onclick="closeEditVaultModal()" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs rounded-xl transition">
+                    မလုပ်တော့ပါ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 3: Main Dashboard -->
+    <div id="mainScreen" class="hidden min-h-screen pb-10">
+        <div class="bg-indigo-700 text-white p-5 rounded-b-3xl shadow-md">
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <span class="text-xs text-indigo-200">မင်္ဂလာပါ</span>
+                    <h2 class="text-lg font-bold" id="displayName">User</h2>
+                </div>
+                <button onclick="navigateTo('loginScreen')" class="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center text-indigo-200 hover:text-white transition hover:bg-indigo-500" title="လော့အုပ်မည်">
+                    <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                </button>
+            </div>
+
+            <div class="bg-white/10 p-4 rounded-2xl border border-white/20 backdrop-blur-sm mt-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-indigo-100">ယခုလ မုန့်ဖိုး လက်ကျန်ငွေ</span>
+                    <span id="dashMonthBadge" class="text-xs bg-indigo-500 px-2.5 py-0.5 rounded-full font-bold">-</span>
+                </div>
+                <div class="text-xl font-bold text-yellow-300 mt-1" id="dashPocketMoney">0 Ks</div>
+                <div class="flex justify-between text-xs text-indigo-200 mt-2 pt-2 border-t border-white/10">
+                    <span>စုစုပေါင်း လစာကျန်ငွေ:</span>
+                    <span id="dashRemainingSalary" class="font-bold text-emerald-300">0 Ks</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 space-y-2.5">
+            <button onclick="navigateTo('addSalaryScreen')" class="w-full p-3.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-2xl flex items-center justify-between text-emerald-800 font-bold shadow-sm transition active:scale-98">
+                <div class="flex items-center space-x-3 text-sm">
+                    <div class="w-9 h-9 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                    </div>
+                    <span>လစာထည့်ရန်</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-emerald-400 text-xs"></i>
+            </button>
+
+            <button onclick="navigateTo('addExpenseScreen')" class="w-full p-3.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-2xl flex items-center justify-between text-rose-800 font-bold shadow-sm transition active:scale-98">
+                <div class="flex items-center space-x-3 text-sm">
+                    <div class="w-9 h-9 bg-rose-500 text-white rounded-xl flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <span>အသုံးစရိတ်ထုတ်ရန်</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-rose-400 text-xs"></i>
+            </button>
+
+            <button onclick="navigateTo('expenseListScreen')" class="w-full p-3.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-2xl flex items-center justify-between text-amber-800 font-bold shadow-sm transition active:scale-98">
+                <div class="flex items-center space-x-3 text-sm">
+                    <div class="w-9 h-9 bg-amber-500 text-white rounded-xl flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <span>အသုံးစရိတ်စာရင်းကြည့်ရန်</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-amber-400 text-xs"></i>
+            </button>
+
+            <button onclick="navigateTo('salaryHistoryScreen')" class="w-full p-3.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-2xl flex items-center justify-between text-blue-800 font-bold shadow-sm transition active:scale-98">
+                <div class="flex items-center space-x-3 text-sm">
+                    <div class="w-9 h-9 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <span>လစာမှတ်တမ်း</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-blue-400 text-xs"></i>
+            </button>
+
+            <button onclick="navigateTo('budgetScreen')" class="w-full p-3.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-2xl flex items-center justify-between text-indigo-800 font-bold shadow-sm transition active:scale-98">
+                <div class="flex items-center space-x-3 text-sm">
+                    <div class="w-9 h-9 bg-indigo-500 text-white rounded-xl flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <span>အသုံးစရိတ်ထိန်းချုပ်ရန်</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-indigo-400 text-xs"></i>
+            </button>
+
+            <button onclick="navigateTo('summaryScreen')" class="w-full p-3.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-2xl flex items-center justify-between text-purple-800 font-bold shadow-sm transition active:scale-98">
+                <div class="flex items-center space-x-3 text-sm">
+                    <div class="w-9 h-9 bg-purple-500 text-white rounded-xl flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                    <span>စာရင်းချုပ်</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-purple-400 text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Screen 4: Add Salary Screen -->
+    <div id="addSalaryScreen" class="hidden min-h-screen p-4">
+        <div class="flex items-center justify-between mb-4 border-b pb-2">
+            <h2 class="text-lg font-bold text-slate-800">လစာထည့်သွင်းရန်</h2>
+            <button onclick="navigateTo('mainScreen')" class="text-indigo-600 font-bold text-xs bg-indigo-50 px-2.5 py-1 rounded-lg hover:bg-indigo-100">Main Page</button>
+        </div>
+
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">လအမည် ရွေးချယ်ပါ</label>
+                <input type="month" id="salaryMonth" onchange="checkSalaryMonthExist()" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">အခြေခံလစာ</label>
+                <input type="number" id="baseSalary" oninput="calculateTotalSalary()" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">ထမင်းစရိတ်</label>
+                <input type="number" id="mealAllowance" oninput="calculateTotalSalary()" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">ရက်မှန်ကြေး</label>
+                <input type="number" id="attendanceBonus" oninput="calculateTotalSalary()" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">OT (နာရီပိုကြေး)</label>
+                <input type="number" id="otFee" oninput="calculateTotalSalary()" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-200 mt-2">
+                <span class="text-xs text-indigo-700 font-bold block">စုစုပေါင်း လစာ</span>
+                <span class="text-xl font-bold text-indigo-900" id="totalSalaryDisplay">0 Ks</span>
+            </div>
+
+            <div class="flex space-x-2 pt-1">
+                <button id="saveSalaryBtn" onclick="saveSalary()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-md transition active:scale-95">
+                    တင်သွင်းမည်
+                </button>
+                <button id="editSalaryBtn" onclick="enableSalaryEdit()" class="hidden flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl shadow-md transition active:scale-95">
+                    ပြန်လည်ပြင်ဆင်ရန်
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 5: Salary History Screen -->
+    <div id="salaryHistoryScreen" class="hidden min-h-screen p-4">
+        <div class="flex items-center justify-between mb-4 border-b pb-2">
+            <h2 class="text-lg font-bold text-slate-800">လစာမှတ်တမ်း</h2>
+            <button onclick="navigateTo('mainScreen')" class="text-indigo-600 font-bold text-xs bg-indigo-50 px-2.5 py-1 rounded-lg hover:bg-indigo-100">Main Page</button>
+        </div>
+
+        <div class="overflow-x-auto bg-white rounded-xl border border-slate-200 shadow-sm">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-700 border-b text-xs">
+                        <th class="p-2.5 font-bold">Months</th>
+                        <th class="p-2.5 font-bold text-right">Total Salary</th>
+                        <th class="p-2.5 font-bold text-center">ဖျက်</th>
+                    </tr>
+                </thead>
+                <tbody id="salaryHistoryTable" class="text-sm">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Screen 6: Budget Screen -->
+    <div id="budgetScreen" class="hidden min-h-screen p-4">
+        <div class="flex items-center justify-between mb-4 border-b pb-2">
+            <h2 class="text-lg font-bold text-slate-800">အသုံးစရိတ်ထိန်းချုပ်ရန်</h2>
+            <button onclick="navigateTo('mainScreen')" class="text-indigo-600 font-bold text-xs bg-indigo-50 px-2.5 py-1 rounded-lg hover:bg-indigo-100">Main Page</button>
+        </div>
+
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">လအမည် ရွေးချယ်ပါ</label>
+                <select id="budgetMonthSelect" onchange="loadBudgetForMonth()" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-700">
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">ထမင်းစရိတ် သတ်မှတ်ချက်</label>
+                <input type="number" id="mealBudget" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">မုန့်ဖိုး သတ်မှတ်ချက်</label>
+                <input type="number" id="pocketMoneyBudget" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">အခြားအသုံးစရိတ် သတ်မှတ်ချက်</label>
+                <input type="number" id="otherBudget" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <div id="budgetStatusMsg" class="p-2.5 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl text-center flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-circle-check"></i>
+                <span id="budgetStatusText">ယခုလ အတွက်အသုံးစရိတ်များ သတ်မှတ်ပြီးပါပြီ</span>
+            </div>
+
+            <div class="flex space-x-2 pt-1">
+                <button id="saveBudgetBtn" onclick="saveBudget()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-md transition active:scale-95">
+                    တင်သွင်းရန်
+                </button>
+                <button id="editBudgetBtn" onclick="enableBudgetEdit()" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl shadow-md transition active:scale-95">
+                    ပြန်လည်ပြင်ဆင်ရန်
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 7: Add Daily Expense Screen -->
+    <div id="addExpenseScreen" class="hidden min-h-screen p-4">
+        <div class="flex items-center justify-between mb-4 border-b pb-2">
+            <h2 class="text-lg font-bold text-slate-800">အသုံးစရိတ်ထုတ်ယူခြင်း</h2>
+            <button onclick="navigateTo('mainScreen')" class="text-indigo-600 font-bold text-xs bg-indigo-50 px-2.5 py-1 rounded-lg hover:bg-indigo-100">Main Page</button>
+        </div>
+
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">နေ့ရက်</label>
+                <input type="date" id="expenseDate" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">အမျိုးအစား</label>
+                <select id="expenseCategory" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-700">
+                    <option value="pocket">မုန့်ဖိုး</option>
+                    <option value="meal">ထမင်းစရိတ်</option>
+                    <option value="other">အခြားအသုံးစရိတ်</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">အကြောင်းအရာ (မှတ်ချက်)</label>
+                <input type="text" id="expenseDesc" placeholder="eg. မုန့်ဝယ်စားခြင်း" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">ပမာဏ (Ks)</label>
+                <input type="number" id="expenseAmount" placeholder="10000" class="w-full p-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+                <span class="text-xs text-amber-700 font-bold block">ယခုလ မုန့်ဖိုး ခွင့်ပြုငွေ လက်ကျန်</span>
+                <span class="text-lg font-bold text-amber-900" id="allowedDailyDisplay">0 Ks</span>
+            </div>
+
+            <button onclick="saveExpense()" class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl shadow-md transition active:scale-95">
+                တင်သွင်းမည်
+            </button>
+        </div>
+    </div>
+
+    <!-- Screen 8: Expense List Screen -->
+    <div id="expenseListScreen" class="hidden min-h-screen p-4 flex flex-col justify-between">
+        <div>
+            <div class="flex items-center justify-between mb-3 border-b pb-2">
+                <h2 class="text-base font-bold text-slate-800">အသုံးစာရိတ်စာရင်းကြည့်ရန်</h2>
+                <button onclick="navigateTo('mainScreen')" class="text-indigo-600 font-bold text-xs bg-indigo-50 px-2.5 py-1 rounded-lg hover:bg-indigo-100">Back</button>
+            </div>
+
+            <div class="mb-3 flex items-center space-x-2">
+                <div class="flex-1">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">လအလိုက် ကြည့်ရန်</label>
+                    <select id="expenseFilterMonth" onchange="renderExpenseTable()" class="w-full p-2 text-xs bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-700 outline-none">
+                    </select>
+                </div>
+                <button onclick="deleteSelectedMonthExpenses()" title="ဤလ၏ စာရင်းအားလုံးဖျက်မည်" class="mt-4 p-2 bg-rose-100 text-rose-600 hover:bg-rose-200 rounded-xl font-bold text-xs flex items-center space-x-1">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>လစာရင်းဖျက်</span>
+                </button>
+            </div>
+
+            <div class="overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm mb-3">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 border-b text-xs">
+                            <th class="p-2 font-bold">နေ့ရက်</th>
+                            <th class="p-2 font-bold">အကြောင်းအရာ</th>
+                            <th class="p-2 font-bold text-right">ပမာဏ</th>
+                            <th class="p-2 font-bold text-center">ဖျက်</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenseTableBody" class="text-xs divide-y">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <button onclick="downloadCSVReport()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center space-x-2 transition active:scale-95 my-2">
+            <i class="fa-solid fa-download"></i>
+            <span>ဒေါင်းလော့ဒ် ပြုလုပ်ရန် (CSV)</span>
+        </button>
+    </div>
+
+    <!-- Screen 9: Summary Screen -->
+    <div id="summaryScreen" class="hidden min-h-screen p-4">
+        <div class="flex items-center justify-between mb-3 border-b pb-2">
+            <h2 class="text-lg font-bold text-slate-800">လချုပ်စာရင်းရယူရန်</h2>
+            <button onclick="navigateTo('mainScreen')" class="text-indigo-600 font-bold text-xs bg-indigo-50 px-2.5 py-1 rounded-lg hover:bg-indigo-100">Main Page</button>
+        </div>
+
+        <div class="mb-3">
+            <label class="block text-xs font-bold text-slate-500 mb-1">လရွေးချယ်ပါ</label>
+            <select id="summaryFilterMonth" onchange="renderSummary()" class="w-full p-2 text-xs bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-700 outline-none">
+            </select>
+        </div>
+
+        <div class="bg-gradient-to-br from-indigo-600 to-purple-700 text-white p-5 rounded-2xl shadow-lg mb-4">
+            <span class="text-xs text-indigo-100 font-bold">ယခုလ စုစုပေါင်း လစာကျန်ငွေ</span>
+            <div class="text-2xl font-extrabold text-yellow-300 mt-1" id="summaryRemainingBalance">0 Ks</div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2 mb-4 shadow-sm text-xs">
+            <div class="flex justify-between border-b pb-2">
+                <span class="text-slate-600">စုစုပေါင်း ရရှိသောလစာ:</span>
+                <span id="summaryTotalSalary" class="font-bold text-emerald-600">0 Ks</span>
+            </div>
+            <div class="flex justify-between border-b pb-2">
+                <span class="text-slate-600">သတ်မှတ် ဘတ်ဂျက် စုစုပေါင်း:</span>
+                <span id="summaryTotalBudget" class="font-bold text-indigo-600">0 Ks</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-600">ထုတ်ယူသုံးစွဲပြီးသော အသုံးစရိတ်:</span>
+                <span id="summaryTotalSpent" class="font-bold text-rose-600">0 Ks</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Global App State with LocalStorage & Global Sync Simulation via LocalStorage event listener
+    let appData = JSON.parse(localStorage.getItem('myFinanceGlobalData')) || {
+        accounts: [], 
+        currentLoggedInUser: "",
+        pendingAccount: null,
+        pendingPasswordRequest: null
+    };
+
+    let vaultData = JSON.parse(localStorage.getItem('myPasswordVault')) || {
+        items: []
+    };
+
+    // Auto sync listener for multi-tab / cross browser session checks if running locally
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'myFinanceGlobalData') {
+            try {
+                appData = JSON.parse(e.newValue);
+                if(document.getElementById('passwordManagerScreen') && !document.getElementById('passwordManagerScreen').classList.contains('hidden')) {
+                    checkPendingAccountRequest();
+                    checkPendingPasswordRequest();
+                    renderVaultItems();
+                }
+            } catch(err) {}
+        }
+    });
+
+    // Helper to get user-specific storage key
+    function getUserStorageKey() {
+        const currentUser = appData.currentLoggedInUser || "default_user";
+        return `myFinanceData_${currentUser}`;
+    }
+
+    // Load active user's financial data (salaries, budgets, expenses)
+    function loadUserData() {
+        const raw = localStorage.getItem(getUserStorageKey());
+        if (raw) {
+            try {
+                return JSON.parse(raw);
+            } catch (e) {
+                return { salaries: [], monthlyBudgets: {}, expenses: [] };
+            }
+        }
+        return {
+            salaries: [],
+            monthlyBudgets: {},
+            expenses: []
+        };
+    }
+
+    // Save active user's financial data to their specific key
+    function saveUserData(userData) {
+        localStorage.setItem(getUserStorageKey(), JSON.stringify(userData));
+    }
+
+    function getValidSalaries() {
+        const userData = loadUserData();
+        const monthRegex = /^\d{4}-\d{2}$/;
+        if (!Array.isArray(userData.salaries)) return [];
+        return userData.salaries.filter(s => s && s.month && monthRegex.test(s.month) && Number(s.amount) > 0);
+    }
+
+    function getLatestSalaryMonth() {
+        const valid = getValidSalaries();
+        if (valid.length > 0) {
+            valid.sort((a, b) => b.month.localeCompare(a.month));
+            return valid[0].month;
+        }
+        return new Date().toISOString().slice(0, 7);
+    }
+
+    function saveData() {
+        localStorage.setItem('myFinanceGlobalData', JSON.stringify(appData));
+        updateDashboard();
+    }
+
+    function saveVaultData() {
+        localStorage.setItem('myPasswordVault', JSON.stringify(vaultData));
+        renderVaultItems();
+    }
+
+    function showToast(msg, isSuccess = true) {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+        const toastIcon = document.getElementById('toastIcon');
+
+        toastMsg.innerText = msg;
+        toastIcon.className = isSuccess ? "fa-solid fa-circle-check text-emerald-400" : "fa-solid fa-triangle-exclamation text-amber-400";
+
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 2200);
+    }
+
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('passwordInput');
+        const toggleIcon = document.getElementById('passwordToggleIcon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+
+    function openRegisterModal() {
+        document.getElementById('regUsername').value = '';
+        document.getElementById('regPassword').value = '';
+        document.getElementById('registerModal').classList.remove('hidden');
+    }
+
+    function closeRegisterModal() {
+        document.getElementById('registerModal').classList.add('hidden');
+    }
+
+    function requestNewAccount() {
+        const uName = document.getElementById('regUsername').value.trim();
+        const uPass = document.getElementById('regPassword').value.trim();
+
+        if(!uName || !uPass) {
+            showToast("User Name နှင့် Password ဖြည့်သွင်းပါ", false);
+            return;
+        }
+
+        appData.pendingAccount = { username: uName, password: uPass };
+        saveData();
+        closeRegisterModal();
+        showToast("အကောင့်ဖန်တီးရန် တောင်းဆိုချက်ကို အောင်မြင်စွာ ပို့လိုက်ပါပြီ။ Admin မှ ခွင့်ပြုသည်အထိ စောင့်ပါ။");
+    }
+
+    function openForgotPasswordModal() {
+        const uName = document.getElementById('usernameInput').value.trim();
+        if (!uName) {
+            showToast("ကျေးဇူးပြု၍ User Name အရင်ထည့်ပါ", false);
+            return;
+        }
+        document.getElementById('requestedPasswordInput').value = '';
+        document.getElementById('forgotPasswordModal').classList.remove('hidden');
+    }
+
+    function closeForgotPasswordModal() {
+        document.getElementById('forgotPasswordModal').classList.add('hidden');
+    }
+
+    function submitPasswordRequest() {
+        const uName = document.getElementById('usernameInput').value.trim();
+        const reqPass = document.getElementById('requestedPasswordInput').value.trim();
+        
+        if(!uName || !reqPass) {
+            showToast("ကျေးဇူးပြု၍ လိုချင်သော Password အသစ် ထည့်သွင်းပါ", false);
+            return;
+        }
+
+        appData.pendingPasswordRequest = { username: uName, password: reqPass };
+        saveData();
+        closeForgotPasswordModal();
+        showToast("Password ပြင်ဆင်ပေးရန် အကြောင်းကြားပြီးပါပြီ!");
+    }
+
+    function loginUser() {
+        // Refresh state from storage to fetch latest approvals if any
+        const latestGlobal = localStorage.getItem('myFinanceGlobalData');
+        if (latestGlobal) {
+            try { appData = JSON.parse(latestGlobal); } catch(e){}
+        }
+
+        const inputName = document.getElementById('usernameInput').value.trim();
+        const inputPass = document.getElementById('passwordInput').value.trim();
+
+        const adminUser = "Admin";
+        const adminPass = "3";
+
+        if (inputName === adminUser && inputPass === adminPass) {
+            showToast("Admin အဖြစ် ဝင်ရောက်ပြီးပါပြီ...", true);
+            setTimeout(() => {
+                navigateTo('passwordManagerScreen');
+            }, 300);
+            return;
+        }
+
+        if (!appData.accounts || appData.accounts.length === 0) {
+            showToast("အကောင့်မရှိသေးပါ။ ကျေးဇူးပြု၍ အကောင့်အသစ် တောင်းဆိုပါ။", false);
+            return;
+        }
+
+        const matchedAccount = appData.accounts.find(acc => acc.username === inputName && acc.password === inputPass);
+
+        if (matchedAccount) {
+            appData.currentLoggedInUser = matchedAccount.username;
+            saveData();
+            navigateTo('mainScreen');
+        } else {
+            showToast("User Name သို့မဟုတ် Password မှားယွင်းနေပါသည် (သို့) Admin ခွင့်ပြုချက် မရသေးပါ။", false);
+        }
+    }
+
+    function navigateTo(screenId) {
+        // Fetch latest global data before screen transition
+        const latestGlobal = localStorage.getItem('myFinanceGlobalData');
+        if (latestGlobal) {
+            try { appData = JSON.parse(latestGlobal); } catch(e){}
+        }
+        const latestVault = localStorage.getItem('myPasswordVault');
+        if (latestVault) {
+            try { vaultData = JSON.parse(latestVault); } catch(e){}
+        }
+
+        const screens = [
+            'loginScreen', 
+            'passwordManagerScreen', 
+            'mainScreen', 
+            'addSalaryScreen', 
+            'salaryHistoryScreen', 
+            'budgetScreen', 
+            'addExpenseScreen', 
+            'expenseListScreen', 
+            'summaryScreen'
+        ];
+        screens.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        });
+
+        const targetScreen = document.getElementById(screenId);
+        if (targetScreen) targetScreen.classList.remove('hidden');
+
+        if (screenId === 'mainScreen') updateDashboard();
+        if (screenId === 'passwordManagerScreen') {
+            renderVaultItems();
+            checkPendingPasswordRequest();
+            checkPendingAccountRequest();
+        }
+        if (screenId === 'addSalaryScreen') loadSalaryScreenData();
+        if (screenId === 'salaryHistoryScreen') renderSalaryHistory();
+        if (screenId === 'budgetScreen') prepareBudgetScreen();
+        if (screenId === 'addExpenseScreen') prepareAddExpenseScreen();
+        if (screenId === 'expenseListScreen') prepareExpenseListScreen();
+        if (screenId === 'summaryScreen') prepareSummaryScreen();
+    }
+
+    function checkPendingAccountRequest() {
+        const section = document.getElementById('accountApprovalSection');
+        const nameDisplay = document.getElementById('pendingAccountNameDisplay');
+        const passDisplay = document.getElementById('pendingAccountPassDisplay');
+
+        if (appData.pendingAccount) {
+            nameDisplay.innerText = appData.pendingAccount.username;
+            passDisplay.innerText = appData.pendingAccount.password;
+            section.classList.remove('hidden');
+        } else {
+            section.classList.add('hidden');
+        }
+    }
+
+    function approveAccountCreation() {
+        if (!appData.pendingAccount) return;
+
+        const newAccUser = appData.pendingAccount.username;
+        const newAccPass = appData.pendingAccount.password;
+
+        if (!appData.accounts) appData.accounts = [];
+        if (!appData.accounts.some(acc => acc.username === newAccUser)) {
+            appData.accounts.push({ username: newAccUser, password: newAccPass });
+        }
+
+        if (!vaultData.items) vaultData.items = [];
+        vaultData.items.unshift({
+            id: Date.now(),
+            title: "User App Account",
+            username: newAccUser,
+            password: newAccPass
+        });
+        saveVaultData();
+
+        appData.pendingAccount = null; 
+        saveData();
+
+        checkPendingAccountRequest();
+        showToast("အကောင့်အသစ်ကို ခွင့်ပြုလိုက်ပြီး Password Manager ထဲသို့ ထည့်သွင်းပြီးပါပြီ!");
+    }
+
+    function rejectAccountCreation() {
+        appData.pendingAccount = null; 
+        saveData();
+        checkPendingAccountRequest();
+        showToast("အကောင့်တောင်းဆိုမှုကို ပယ်ချလိုက်ပါပြီ", false);
+    }
+
+    function checkPendingPasswordRequest() {
+        const section = document.getElementById('passwordRequestSection');
+        const userDisplay = document.getElementById('pendingPasswordUserDisplay');
+        const display = document.getElementById('pendingPasswordDisplay');
+
+        if (appData.pendingPasswordRequest) {
+            userDisplay.innerText = `User: ${appData.pendingPasswordRequest.username}`;
+            display.innerText = appData.pendingPasswordRequest.password;
+            section.classList.remove('hidden');
+        } else {
+            section.classList.add('hidden');
+        }
+    }
+
+    function approvePasswordChange() {
+        if (!appData.pendingPasswordRequest) return;
+        
+        const { username, password } = appData.pendingPasswordRequest;
+
+        const account = appData.accounts.find(acc => acc.username === username);
+        if (account) {
+            account.password = password;
+        }
+
+        const vaultItem = (vaultData.items || []).find(item => item.username === username);
+        if (vaultItem) {
+            vaultItem.password = password;
+            saveVaultData();
+        }
+
+        appData.pendingPasswordRequest = null; 
+        saveData();
+
+        checkPendingPasswordRequest();
+        showToast("Password အသစ်သို့ အောင်မြင်စွာ ပြောင်းလဲလိုက်ပါပြီ!");
+    }
+
+    function rejectPasswordChange() {
+        appData.pendingPasswordRequest = null; 
+        saveData();
+        checkPendingPasswordRequest();
+        showToast("Password ပြောင်းလဲမှုကို ပယ်ချလိုက်ပါပြီ", false);
+    }
+
+    function renderVaultItems() {
+        const vaultList = document.getElementById('vaultList');
+        const searchQuery = document.getElementById('vaultSearch').value.toLowerCase().trim();
+        vaultList.innerHTML = '';
+
+        const items = vaultData.items || [];
+        document.getElementById('vaultCount').innerText = `${items.length} Items Saved`;
+
+        const filtered = items.filter(item => 
+            (item.title && item.title.toLowerCase().includes(searchQuery)) ||
+            (item.username && item.username.toLowerCase().includes(searchQuery))
+        );
+
+        if (filtered.length === 0) {
+            vaultList.innerHTML = `
+                <div class="text-center py-16 text-slate-500 text-xs">
+                    <p>Password စာရင်း မရှိသေးပါ။</p>
+                </div>
+            `;
+            return;
+        }
+
+        filtered.forEach(item => {
+            vaultList.innerHTML += `
+                <div class="bg-slate-800 border border-slate-700/60 rounded-xl p-3 flex items-center justify-between shadow-sm hover:border-slate-600 transition">
+                    <div class="flex items-center space-x-3 overflow-hidden pr-2">
+                        <div class="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center text-indigo-400 font-bold shrink-0 text-xs">
+                            ${(item.title || 'P').charAt(0).toUpperCase()}
+                        </div>
+                        <div class="truncate">
+                            <h4 class="text-xs font-bold text-slate-200 truncate">${item.title}</h4>
+                            <p class="text-[11px] text-slate-400 truncate">${item.username || '-'}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-1 shrink-0">
+                        <button onclick="openEditVaultModal(${item.id})" title="ပြင်ဆင်ရန်" class="p-1.5 text-slate-400 hover:text-emerald-400 rounded-lg transition text-xs font-bold flex items-center space-x-1 bg-slate-700/50 px-2">
+                            <i class="fa-solid fa-user-pen text-xs"></i>
+                            <span class="text-[10px]">ပြင်ဆင်ရန်</span>
+                        </button>
+                        <button onclick="copyToClipboard('${item.password}')" title="Copy Password" class="p-1.5 text-slate-400 hover:text-indigo-400 rounded-lg transition">
+                            <i class="fa-regular fa-copy text-xs"></i>
+                        </button>
+                        <button onclick="deleteVaultItem(${item.id})" title="Delete" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg transition">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function openEditVaultModal(id) {
+        const items = vaultData.items || [];
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+
+        document.getElementById('editVaultId').value = item.id;
+        document.getElementById('editVTitle').value = item.title || '';
+        document.getElementById('editVUser').value = item.username || '';
+        document.getElementById('editVPass').value = item.password || '';
+
+        document.getElementById('editVaultModal').classList.remove('hidden');
+    }
+
+    function closeEditVaultModal() {
+        document.getElementById('editVaultModal').classList.add('hidden');
+    }
+
+    function updateVaultItem() {
+        const id = Number(document.getElementById('editVaultId').value);
+        const title = document.getElementById('editVTitle').value.trim();
+        const username = document.getElementById('editVUser').value.trim();
+        const password = document.getElementById('editVPass').value.trim();
+
+        if (!title || !password) {
+            showToast("Title နှင့် Password ထည့်သွင်းပါ", false);
+            return;
+        }
+
+        if (!vaultData.items) vaultData.items = [];
+        const index = vaultData.items.findIndex(i => i.id === id);
+        
+        if (index !== -1) {
+            const oldItem = vaultData.items[index];
+            vaultData.items[index] = { id, title, username, password };
+            
+            if (appData.accounts) {
+                const accIndex = appData.accounts.findIndex(acc => acc.username === oldItem.username);
+                if (accIndex !== -1) {
+                    if (username) {
+                        appData.accounts[accIndex] = { username: username, password: password };
+                    } else {
+                        appData.accounts[accIndex].password = password;
+                    }
+                } else if (username) {
+                    if (!appData.accounts.some(acc => acc.username === username)) {
+                        appData.accounts.push({ username: username, password: password });
+                    }
+                }
+            }
+
+            saveVaultData();
+            saveData(); 
+            closeEditVaultModal();
+            showToast("Password အချက်အလက်များကို အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ!");
+        }
+    }
+
+    function openAddVaultModal() {
+        document.getElementById('vTitle').value = '';
+        document.getElementById('vUser').value = '';
+        document.getElementById('vPass').value = '';
+        document.getElementById('addVaultModal').classList.remove('hidden');
+    }
+
+    function closeAddVaultModal() {
+        document.getElementById('addVaultModal').classList.add('hidden');
+    }
+
+    function saveVaultItem() {
+        const title = document.getElementById('vTitle').value.trim();
+        const username = document.getElementById('vUser').value.trim();
+        const password = document.getElementById('vPass').value.trim();
+
+        if (!title || !password) {
+            showToast("Title နှင့် Password ဖြည့်သွင်းပါ", false);
+            return;
+        }
+
+        if (!vaultData.items) vaultData.items = [];
+
+        vaultData.items.unshift({
+            id: Date.now(),
+            title,
+            username,
+            password
+        });
+
+        if (title.toLowerCase().includes("user app account") && username) {
+            if (!appData.accounts) appData.accounts = [];
+            if (!appData.accounts.some(acc => acc.username === username)) {
+                appData.accounts.push({ username: username, password: password });
+            }
+        }
+
+        saveVaultData();
+        saveData();
+        closeAddVaultModal();
+        showToast("Password စာရင်းအသစ် သိမ်းဆည်းပြီးပါပြီ!");
+    }
+
+    function deleteVaultItem(id) {
+        if (confirm("ဤ Password စာရင်းအား ဖျက်ရန် သေချာပါသလား?")) {
+            const item = (vaultData.items || []).find(i => i.id === id);
+            if (item && item.username) {
+                if (appData.accounts) {
+                    appData.accounts = appData.accounts.filter(acc => acc.username !== item.username);
+                }
+            }
+            vaultData.items = vaultData.items.filter(item => item.id !== id);
+            saveVaultData();
+            saveData();
+            showToast("ဖျက်ပြီးပါပြီ", false);
+        }
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast("Password အား ကူးယူပြီးပါပြီ (Copied)!");
+        });
+    }
+
+    function generateRandomPassword() {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        let res = "";
+        for (let i = 0; i < 12; i++) {
+            res += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        copyToClipboard(res);
+    }
+
+    function calculateTotalSalary() {
+        const base = Number(document.getElementById('baseSalary').value) || 0;
+        const meal = Number(document.getElementById('mealAllowance').value) || 0;
+        const bonus = Number(document.getElementById('attendanceBonus').value) || 0;
+        const ot = Number(document.getElementById('otFee').value) || 0;
+
+        const total = base + meal + bonus + ot;
+        document.getElementById('totalSalaryDisplay').innerText = total.toLocaleString() + " Ks";
+        return { total, base, meal, bonus, ot };
+    }
+
+    function checkSalaryMonthExist() {
+        const selectedMonth = document.getElementById('salaryMonth').value || getLatestSalaryMonth();
+        const existing = getValidSalaries().find(s => s.month === selectedMonth);
+
+        const saveBtn = document.getElementById('saveSalaryBtn');
+        const editBtn = document.getElementById('editSalaryBtn');
+        const inputs = ['baseSalary', 'mealAllowance', 'attendanceBonus', 'otFee'];
+
+        if (existing) {
+            document.getElementById('baseSalary').value = existing.base;
+            document.getElementById('mealAllowance').value = existing.meal;
+            document.getElementById('attendanceBonus').value = existing.bonus;
+            document.getElementById('otFee').value = existing.ot;
+
+            inputs.forEach(id => document.getElementById(id).disabled = true);
+            saveBtn.classList.add('hidden');
+            editBtn.classList.remove('hidden');
+            showToast(`${selectedMonth} အတွက် လစာထည့်သွင်းပြီးပါပြီ`, false);
+        } else {
+            document.getElementById('baseSalary').value = 0;
+            document.getElementById('mealAllowance').value = 0;
+            document.getElementById('attendanceBonus').value = 0;
+            document.getElementById('otFee').value = 0;
+
+            inputs.forEach(id => document.getElementById(id).disabled = false);
+            saveBtn.classList.remove('hidden');
+            editBtn.classList.add('hidden');
+        }
+        calculateTotalSalary();
+    }
+
+    function loadSalaryScreenData() {
+        document.getElementById('salaryMonth').value = getLatestSalaryMonth();
+        checkSalaryMonthExist();
+    }
+
+    function enableSalaryEdit() {
+        const inputs = ['baseSalary', 'mealAllowance', 'attendanceBonus', 'otFee'];
+        inputs.forEach(id => document.getElementById(id).disabled = false);
+        document.getElementById('saveSalaryBtn').classList.remove('hidden');
+        document.getElementById('editSalaryBtn').classList.add('hidden');
+        showToast("လစာအချက်အလက်များ ပြန်လည်ပြင်ဆင်နိုင်ပါပြီ");
+    }
+
+    function saveSalary() {
+        const month = document.getElementById('salaryMonth').value || getLatestSalaryMonth();
+        const salaryDetails = calculateTotalSalary();
+
+        if (salaryDetails.total <= 0) {
+            showToast("ကျေးဇူးပြု၍ လစာ ပမာဏ ထည့်သွင်းပါ။", false);
+            return;
+        }
+
+        let userData = loadUserData();
+        let currentSalaries = getValidSalaries();
+        const existingIndex = currentSalaries.findIndex(s => s.month === month);
+        
+        if (existingIndex !== -1) {
+            currentSalaries[existingIndex] = { month, amount: salaryDetails.total, ...salaryDetails };
+        } else {
+            currentSalaries.unshift({ month, amount: salaryDetails.total, ...salaryDetails });
+        }
+
+        userData.salaries = currentSalaries;
+        saveUserData(userData);
+        saveData();
+        showToast("လစာမှတ်တမ်း သိမ်းဆည်းပြီးပါပြီ!");
+        checkSalaryMonthExist();
+    }
+
+    function deleteSalary(month) {
+        if (confirm(`${month} လစာမှတ်တမ်းကို ဖျက်ရန် သေချာပါသလား?`)) {
+            let userData = loadUserData();
+            userData.salaries = getValidSalaries().filter(s => s.month !== month);
+            saveUserData(userData);
+            saveData();
+            renderSalaryHistory();
+            showToast("လစာမှတ်တမ်း ဖျက်ပြီးပါပြီ", false);
+        }
+    }
+
+    function renderSalaryHistory() {
+        const tbody = document.getElementById('salaryHistoryTable');
+        tbody.innerHTML = '';
+
+        const validSalaries = getValidSalaries();
+
+        if (validSalaries.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 font-medium">လစာမှတ်တမ်းမရှိသေးပါ။</td></tr>`;
+            return;
+        }
+
+        validSalaries.sort((a, b) => b.month.localeCompare(a.month));
+
+        validSalaries.forEach(item => {
+            tbody.innerHTML += `
+                <tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-2.5 font-medium text-slate-800">${item.month}</td>
+                    <td class="p-2.5 text-right font-bold text-emerald-600">${item.amount.toLocaleString()} Ks</td>
+                    <td class="p-2.5 text-center">
+                        <button onclick="deleteSalary('${item.month}')" class="text-slate-400 hover:text-rose-600 p-1 rounded-lg transition">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function populateMonthSelect(elementId) {
+        const select = document.getElementById(elementId);
+        if (!select) return;
+        select.innerHTML = '';
+
+        const userData = loadUserData();
+        const monthRegex = /^\d{4}-\d{2}$/;
+        const validSalaries = getValidSalaries();
+        const validExpenses = (userData.expenses || []).filter(e => e && e.month && monthRegex.test(e.month));
+
+        const rawMonths = [
+            ...validSalaries.map(s => s.month),
+            ...validExpenses.map(e => e.month)
+        ];
+
+        let validMonths = Array.from(new Set(rawMonths)).sort().reverse();
+        const latestMonth = getLatestSalaryMonth();
+
+        if (validMonths.length === 0) {
+            validMonths.push(latestMonth);
+        }
+
+        validMonths.forEach(m => {
+            const isSelected = m === latestMonth ? 'selected' : '';
+            select.innerHTML += `<option value="${m}" ${isSelected}>${m}</option>`;
+        });
+    }
+
+    function prepareBudgetScreen() {
+        populateMonthSelect('budgetMonthSelect');
+        loadBudgetForMonth();
+    }
+
+    function loadBudgetForMonth() {
+        const selectEl = document.getElementById('budgetMonthSelect');
+        const selectedMonth = (selectEl && selectEl.value) ? selectEl.value : getLatestSalaryMonth();
+        let userData = loadUserData();
+        if (!userData.monthlyBudgets) userData.monthlyBudgets = {};
+
+        const bData = userData.monthlyBudgets[selectedMonth];
+        const inputs = ['mealBudget', 'pocketMoneyBudget', 'otherBudget'];
+        const hasSalary = getValidSalaries().some(s => s.month === selectedMonth);
+
+        const statusMsg = document.getElementById('budgetStatusMsg');
+
+        if (!hasSalary) {
+            document.getElementById('mealBudget').value = 0;
+            document.getElementById('pocketMoneyBudget').value = 0;
+            document.getElementById('otherBudget').value = 0;
+
+            inputs.forEach(id => document.getElementById(id).disabled = true);
+            document.getElementById('saveBudgetBtn').classList.add('hidden');
+            document.getElementById('editBudgetBtn').classList.add('hidden');
+            
+            statusMsg.className = "p-2.5 bg-rose-100 text-rose-800 text-xs font-bold rounded-xl text-center flex items-center justify-center space-x-2";
+            document.getElementById('budgetStatusText').innerText = `${selectedMonth} အတွက် လစာ မထည့်ရသေးသဖြင့် ဘတ်ဂျက် သတ်မှတ်၍ မရပါ`;
+            return;
+        }
+
+        statusMsg.className = "p-2.5 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl text-center flex items-center justify-center space-x-2";
+
+        if (bData) {
+            document.getElementById('mealBudget').value = bData.meal || 0;
+            document.getElementById('pocketMoneyBudget').value = bData.pocket || 0;
+            document.getElementById('otherBudget').value = bData.other || 0;
+
+            inputs.forEach(id => document.getElementById(id).disabled = true);
+            document.getElementById('saveBudgetBtn').classList.add('hidden');
+            document.getElementById('editBudgetBtn').classList.remove('hidden');
+            document.getElementById('budgetStatusText').innerText = `${selectedMonth} အတွက် အသုံးစရိတ်များ သတ်မှတ်ပြီးပါပြီ`;
+        } else {
+            document.getElementById('mealBudget').value = 0;
+            document.getElementById('pocketMoneyBudget').value = 0;
+            document.getElementById('otherBudget').value = 0;
+
+            inputs.forEach(id => document.getElementById(id).disabled = false);
+            document.getElementById('saveBudgetBtn').classList.remove('hidden');
+            document.getElementById('editBudgetBtn').classList.add('hidden');
+            document.getElementById('budgetStatusText').innerText = `${selectedMonth} အတွက် ဘတ်ဂျက် မသတ်မှတ်ရသေးပါ`;
+        }
+    }
+
+    function enableBudgetEdit() {
+        const selectEl = document.getElementById('budgetMonthSelect');
+        const selectedMonth = (selectEl && selectEl.value) ? selectEl.value : getLatestSalaryMonth();
+        const hasSalary = getValidSalaries().some(s => s.month === selectedMonth);
+        
+        if (!hasSalary) {
+            showToast("လစာ မထည့်ရသေးပါ!", false);
+            return;
+        }
+
+        const inputs = ['mealBudget', 'pocketMoneyBudget', 'otherBudget'];
+        inputs.forEach(id => document.getElementById(id).disabled = false);
+        document.getElementById('saveBudgetBtn').classList.remove('hidden');
+        document.getElementById('editBudgetBtn').classList.add('hidden');
+        showToast("ဘတ်ဂျက်များကို ပြန်လည်ပြင်ဆင်နိုင်ပါပြီ");
+    }
+
+    function saveBudget() {
+        const selectEl = document.getElementById('budgetMonthSelect');
+        const selectedMonth = (selectEl && selectEl.value) ? selectEl.value : getLatestSalaryMonth();
+        const hasSalary = getValidSalaries().some(s => s.month === selectedMonth);
+        
+        if (!hasSalary) {
+            showToast(`${selectedMonth} အတွက် လစာ မထည့်ရသေးပါ!`, false);
+            return;
+        }
+
+        let userData = loadUserData();
+        if (!userData.monthlyBudgets) userData.monthlyBudgets = {};
+
+        userData.monthlyBudgets[selectedMonth] = {
+            meal: Number(document.getElementById('mealBudget').value) || 0,
+            pocket: Number(document.getElementById('pocketMoneyBudget').value) || 0,
+            other: Number(document.getElementById('otherBudget').value) || 0
+        };
+
+        saveUserData(userData);
+        saveData();
+        showToast("အသုံးစရိတ် သတ်မှတ်ချက် သိမ်းဆည်းပြီးပါပြီ!");
+        loadBudgetForMonth();
+    }
+
+    function prepareAddExpenseScreen() {
+        document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('expenseDesc').value = '';
+        document.getElementById('expenseAmount').value = '';
+        updateRemainingPocketDisplay();
+    }
+
+    function updateRemainingPocketDisplay() {
+        const activeMonth = getLatestSalaryMonth();
+        let userData = loadUserData();
+        const bData = userData.monthlyBudgets ? userData.monthlyBudgets[activeMonth] : null;
+        const allowedPocket = bData ? bData.pocket : 0;
+
+        const pocketSpent = (userData.expenses || [])
+            .filter(e => e.month === activeMonth && e.category === 'pocket')
+            .reduce((sum, item) => sum + item.amount, 0);
+
+        const pocketRemaining = Math.max(0, allowedPocket - pocketSpent);
+        document.getElementById('allowedDailyDisplay').innerText = pocketRemaining.toLocaleString() + " Ks";
+    }
+
+    function saveExpense() {
+        const dateStr = document.getElementById('expenseDate').value || new Date().toISOString().split('T')[0];
+        const category = document.getElementById('expenseCategory').value;
+        const desc = document.getElementById('expenseDesc').value.trim() || 'အခြားအသုံးစရိတ်';
+        const amount = Number(document.getElementById('expenseAmount').value) || 0;
+
+        if (amount <= 0) {
+            showToast("ကျေးဇူးပြု၍ ပမာဏ မှန်ကန်စွာ ထည့်သွင်းပါ။", false);
+            return;
+        }
+
+        const expenseMonth = dateStr.substring(0, 7);
+
+        let userData = loadUserData();
+        if(!userData.expenses) userData.expenses = [];
+        userData.expenses.unshift({
+            id: Date.now(),
+            date: dateStr,
+            category: category,
+            desc: desc,
+            amount: amount,
+            month: expenseMonth
+        });
+
+        saveUserData(userData);
+        saveData();
+        showToast("အသုံးစရိတ် တင်သွင်းပြီးပါပြီ!");
+        setTimeout(() => navigateTo('mainScreen'), 800);
+    }
+
+    function deleteExpense(id) {
+        if(confirm("ဤအသုံးစရိတ်ကို ဖျက်ရန် သေချာပါသလား?")) {
+            let userData = loadUserData();
+            userData.expenses = userData.expenses.filter(e => e.id !== id);
+            saveUserData(userData);
+            saveData();
+            renderExpenseTable();
+            showToast("အသုံးစရိတ်စာရင်း ဖျက်ပြီးပါပြီ", false);
+        }
+    }
+
+    function deleteSelectedMonthExpenses() {
+        const selectedMonth = document.getElementById('expenseFilterMonth').value;
+        if (!selectedMonth) return;
+
+        if (confirm(`${selectedMonth} လအတွက် အသုံးစရိတ် စာရင်းတစ်ခုလုံးကို ဖျက်ရန် သေချာပါသလား?`)) {
+            let userData = loadUserData();
+            userData.expenses = (userData.expenses || []).filter(e => e.month !== selectedMonth);
+            saveUserData(userData);
+            saveData();
+            prepareExpenseListScreen();
+            showToast(`${selectedMonth} အတွက် စာရင်းများ ဖျက်ပြီးပါပြီ`, false);
+        }
+    }
+
+    function prepareExpenseListScreen() {
+        populateMonthSelect('expenseFilterMonth');
+        renderExpenseTable();
+    }
+
+    function renderExpenseTable() {
+        const selectEl = document.getElementById('expenseFilterMonth');
+        const selectedMonth = (selectEl && selectEl.value) ? selectEl.value : getLatestSalaryMonth();
+        const tbody = document.getElementById('expenseTableBody');
+        tbody.innerHTML = '';
+
+        let userData = loadUserData();
+        const filtered = (userData.expenses || []).filter(e => e.month === selectedMonth);
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 font-medium">ဤလအတွက် အသုံးစရိတ် စာရင်းမရှိသေးပါ။</td></tr>`;
+            return;
+        }
+
+        filtered.forEach(item => {
+            tbody.innerHTML += `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="p-2 text-slate-600 text-xs">${item.date}</td>
+                    <td class="p-2 font-medium text-slate-800">${item.desc}</td>
+                    <td class="p-2 text-right font-bold text-rose-600">${item.amount.toLocaleString()} Ks</td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteExpense(${item.id})" class="text-slate-400 hover:text-rose-600 p-1 rounded-lg transition">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function downloadCSVReport() {
+        const selectEl = document.getElementById('expenseFilterMonth');
+        const selectedMonth = (selectEl && selectEl.value) ? selectEl.value : getLatestSalaryMonth();
+        let userData = loadUserData();
+        const filtered = (userData.expenses || []).filter(e => e.month === selectedMonth);
+
+        if(filtered.length === 0) {
+            showToast("ဒေါင်းလော့ဒ်လုပ်ရန် စာရင်းမရှိပါ", false);
+            return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,Date,Description,Category,Amount(Ks)\n";
+        filtered.forEach(e => csvContent += `${e.date},"${e.desc}",${e.category},${e.amount}\n`);
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Expense_Report_${selectedMonth}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast("CSV ဖိုင် ဒေါင်းလော့ဒ် ရယူပြီးပါပြီ။");
+    }
+
+    function updateDashboard() {
+        const validSalaries = getValidSalaries();
+        const activeMonth = getLatestSalaryMonth();
+        let userData = loadUserData();
+
+        document.getElementById('displayName').innerText = appData.currentLoggedInUser || "User";
+        document.getElementById('dashMonthBadge').innerText = validSalaries.length > 0 ? activeMonth : "မရှိသေးပါ";
+
+        const bData = userData.monthlyBudgets ? userData.monthlyBudgets[activeMonth] : null;
+        const allowedPocket = bData ? bData.pocket : 0;
+
+        const pocketSpent = (userData.expenses || [])
+            .filter(e => e.month === activeMonth && e.category === 'pocket')
+            .reduce((sum, item) => sum + item.amount, 0);
+
+        const pocketRemaining = Math.max(0, allowedPocket - pocketSpent);
+        document.getElementById('dashPocketMoney').innerText = pocketRemaining.toLocaleString() + " Ks";
+
+        const currentSalaryObj = validSalaries.find(s => s.month === activeMonth);
+        const currentSalary = currentSalaryObj ? currentSalaryObj.amount : 0;
+
+        const totalSpentInMonth = (userData.expenses || [])
+            .filter(e => e.month === activeMonth)
+            .reduce((sum, item) => sum + item.amount, 0);
+
+        const remainingSalary = currentSalary - totalSpentInMonth;
+        document.getElementById('dashRemainingSalary').innerText = remainingSalary.toLocaleString() + " Ks";
+    }
+
+    function prepareSummaryScreen() {
+        populateMonthSelect('summaryFilterMonth');
+        renderSummary();
+    }
+
+    function renderSummary() {
+        const selectEl = document.getElementById('summaryFilterMonth');
+        const selectedMonth = (selectEl && selectEl.value) ? selectEl.value : getLatestSalaryMonth();
+        let userData = loadUserData();
+
+        const currentSalaryObj = getValidSalaries().find(s => s.month === selectedMonth);
+        const currentSalary = currentSalaryObj ? currentSalaryObj.amount : 0.0;
+
+        const bData = userData.monthlyBudgets ? userData.monthlyBudgets[selectedMonth] : null;
+        const totalBudget = bData ? (bData.meal + bData.pocket + bData.other) : 0;
+
+        const totalSpent = (userData.expenses || [])
+            .filter(e => e.month === selectedMonth)
+            .reduce((sum, item) => sum + item.amount, 0);
+
+        const netBalance = currentSalary - totalSpent;
+
+        document.getElementById('summaryTotalSalary').innerText = currentSalary.toLocaleString() + " Ks";
+        document.getElementById('summaryTotalBudget').innerText = totalBudget.toLocaleString() + " Ks";
+        document.getElementById('summaryTotalSpent').innerText = totalSpent.toLocaleString() + " Ks";
+        document.getElementById('summaryRemainingBalance').innerText = netBalance.toLocaleString() + " Ks";
+    }
+
+    document.getElementById('expenseDate').valueAsDate = new Date();
+    updateDashboard();
+</script>
+
+</body>
+</html>
