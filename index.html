@@ -106,7 +106,7 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <p class="text-xs text-slate-300">အကောင့်ဖန်တီးရန် တင်သွင်းလိုက်ပါက Admin မှ ခွင့်ပြုပေးမှသာ ဝင်ရောက်နိုင်မည် ဖြစ်ပါသည်။</p>
+            <p class="text-xs text-slate-300">အကောင့်ဖန်တီးရန် တင်သွင်းလိုက်ပါက Admin ထံသို့ ရောက်ရှိမည်ဖြစ်ပြီး Admin မှ ခွင့်ပြုပေးမှသာ ဝင်ရောက်နိုင်မည် ဖြစ်ပါသည်။</p>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">User Name</label>
                 <input type="text" id="regUsername" placeholder="သုံးမည့် အမည်ထည့်ပါ..." class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-yellow-400">
@@ -638,7 +638,7 @@
 </div>
 
 <script>
-    // Global App State (stores accounts, pending requests, and current user session)
+    // Global App State with LocalStorage & Global Sync Simulation via LocalStorage event listener
     let appData = JSON.parse(localStorage.getItem('myFinanceGlobalData')) || {
         accounts: [], 
         currentLoggedInUser: "",
@@ -649,6 +649,20 @@
     let vaultData = JSON.parse(localStorage.getItem('myPasswordVault')) || {
         items: []
     };
+
+    // Auto sync listener for multi-tab / cross browser session checks if running locally
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'myFinanceGlobalData') {
+            try {
+                appData = JSON.parse(e.newValue);
+                if(document.getElementById('passwordManagerScreen') && !document.getElementById('passwordManagerScreen').classList.contains('hidden')) {
+                    checkPendingAccountRequest();
+                    checkPendingPasswordRequest();
+                    renderVaultItems();
+                }
+            } catch(err) {}
+        }
+    });
 
     // Helper to get user-specific storage key
     function getUserStorageKey() {
@@ -752,7 +766,7 @@
         appData.pendingAccount = { username: uName, password: uPass };
         saveData();
         closeRegisterModal();
-        showToast("အကောင့်ဖန်တီးရန် တောင်းဆိုပြီးပါပြီ။ Admin မှ ခွင့်ပြုသည်အထိ စောင့်ပါ။");
+        showToast("အကောင့်ဖန်တီးရန် တောင်းဆိုချက်ကို အောင်မြင်စွာ ပို့လိုက်ပါပြီ။ Admin မှ ခွင့်ပြုသည်အထိ စောင့်ပါ။");
     }
 
     function openForgotPasswordModal() {
@@ -785,6 +799,12 @@
     }
 
     function loginUser() {
+        // Refresh state from storage to fetch latest approvals if any
+        const latestGlobal = localStorage.getItem('myFinanceGlobalData');
+        if (latestGlobal) {
+            try { appData = JSON.parse(latestGlobal); } catch(e){}
+        }
+
         const inputName = document.getElementById('usernameInput').value.trim();
         const inputPass = document.getElementById('passwordInput').value.trim();
 
@@ -816,6 +836,16 @@
     }
 
     function navigateTo(screenId) {
+        // Fetch latest global data before screen transition
+        const latestGlobal = localStorage.getItem('myFinanceGlobalData');
+        if (latestGlobal) {
+            try { appData = JSON.parse(latestGlobal); } catch(e){}
+        }
+        const latestVault = localStorage.getItem('myPasswordVault');
+        if (latestVault) {
+            try { vaultData = JSON.parse(latestVault); } catch(e){}
+        }
+
         const screens = [
             'loginScreen', 
             'passwordManagerScreen', 
